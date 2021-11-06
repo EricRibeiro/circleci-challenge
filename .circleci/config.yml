@@ -49,7 +49,7 @@ jobs:
       - store_artifacts:
           path: coverage
       - persist_to_workspace:
-          root: $CIRCLE_WORKING_DIRECTORY
+          root: ./
           paths:
             - "."
   build:

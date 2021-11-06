@@ -100,7 +100,7 @@ workflows:
             - test
   deploy:
     when:
-      equal : [ master, << pipeline.git.branch >> ]
+      equal : [ main, << pipeline.git.branch >> ]
     jobs:
       - deploy:
           requires:

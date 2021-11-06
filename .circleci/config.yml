@@ -48,6 +48,10 @@ jobs:
             yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage
+      - persist_to_workspace:
+          root: $CIRCLE_WORKING_DIRECTORY
+          paths:
+            - "."
   build:
     <<: *defaults
     steps:

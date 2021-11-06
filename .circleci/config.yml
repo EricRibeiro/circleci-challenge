@@ -100,7 +100,7 @@ workflows:
             - test
   deploy:
     when:
-      equal : [ potato, << pipeline.git.branch >> ]
+      equal : [ master, << pipeline.git.branch >> ]
     jobs:
       - deploy:
           requires:

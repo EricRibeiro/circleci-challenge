@@ -1,5 +1,10 @@
 version: 2.1
 
+aliases: # https://circleci.com/blog/decrease-your-build-times-by-running-jobs-in-parallel-with-workflows/
+  - &attach_workspace
+      attach_workspace:
+        at: ~/project
+
 defaults: &defaults # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
   docker: 
       - image: cimg/node:14.15.4
@@ -55,12 +60,18 @@ jobs:
   build:
     <<: *defaults
     steps:
+      - *attach_workspace
       - run:
           name: Build project
           command: yarn build
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - "."
   deploy:
     <<: *defaults
     steps:
+      - *attach_workspace
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc

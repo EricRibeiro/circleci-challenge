@@ -105,3 +105,4 @@ dist
 
 # Mocha test Report
 mocha-result.txt
+test-results.xml

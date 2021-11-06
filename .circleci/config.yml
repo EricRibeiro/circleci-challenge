@@ -22,6 +22,8 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
+      - store_test_results:
+          path: test-results.xml
       - run:
           name: Run coverage
           command: yarn coverage

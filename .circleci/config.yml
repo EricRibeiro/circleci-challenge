@@ -100,6 +100,7 @@ workflows:
   version: 2
   test_build_and_deploy:
     jobs:
+      - checkout
       - test
       - build:
           requires:

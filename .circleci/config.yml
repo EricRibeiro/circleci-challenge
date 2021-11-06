@@ -57,3 +57,10 @@ jobs:
       - run:
           name: Publish package
           command: yarn publish
+
+workflows:
+  version: 2
+  test_and_deploy:
+    jobs:
+      - test
+      - deploy

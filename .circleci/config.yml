@@ -1,13 +1,21 @@
 version: 2.1
 
-aliases: # https://circleci.com/blog/decrease-your-build-times-by-running-jobs-in-parallel-with-workflows/
+aliases: # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
+  - &defaults
+      docker: 
+        - image: cimg/node:14.15.4
   - &attach_workspace
       attach_workspace:
         at: ~/project
-
-defaults: &defaults # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
-  docker: 
-      - image: cimg/node:14.15.4
+  - &restore_cache
+      restore_cache: # using progressively more generic keys to increase hit odds
+        keys:
+          - yarn-packages-v1-{{ checksum "yarn.lock" }}
+          - yarn-packages-v1-
+  - &install_packages
+      run: 
+        name: Install packages
+        command: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
 
 jobs:
   test:
@@ -15,13 +23,8 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - restore_cache: # using progressively more generic keys to increase hit odds
-          keys:
-            - yarn-packages-v1-{{ checksum "yarn.lock" }}
-            - yarn-packages-v1-
-      - run:
-          name: Install packages
-          command: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
+      - *restore_cache
+      - *install_packages
       - save_cache:
           paths:
             - ~/.cache/yarn
@@ -58,6 +61,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout # it's probably better to checkout again than persisting the workspace twice in the previous job
+      - *restore_cache
+      - *install_packages
       - run:
           name: Build project
           command: yarn build
@@ -87,7 +92,7 @@ jobs:
 
 workflows:
   version: 2
-  test_and_deploy:
+  test_build_and_deploy:
     jobs:
       - test
       - build:

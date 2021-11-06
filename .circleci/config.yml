@@ -1,9 +1,13 @@
 version: 2.1
-jobs:
-  build:
-    parallelism: 2
-    docker:
+
+defaults: &defaults # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
+  docker: 
       - image: cimg/node:14.15.4
+
+jobs:
+  test:
+    <<: *defaults
+    parallelism: 2
     steps:
       - checkout
       - restore_cache: # using progressively more generic keys to increase hit odds
@@ -44,3 +48,12 @@ jobs:
             yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage
+  deploy:
+    <<: *defaults
+    steps:
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Publish package
+          command: yarn publish

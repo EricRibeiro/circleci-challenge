@@ -21,4 +21,9 @@ describe("Checking if the math library does its thing", () => {
     const val: number = multiply(256, 128, 64);
     expect(val).to.equal(2097152);
   });
+
+  it("should return a valid number from a multiply operation with more than four arguments", () => {
+    const val: number = multiply(256, 128, 64, 32, 16);
+    expect(val).to.equal(1073741824);
+  });
 });

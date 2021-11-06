@@ -48,6 +48,12 @@ jobs:
             yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage
+  build:
+    <<: *defaults
+    steps:
+      - run:
+          name: Build project
+          command: yarn build
   deploy:
     <<: *defaults
     steps:
@@ -63,4 +69,9 @@ workflows:
   test_and_deploy:
     jobs:
       - test
-      - deploy
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - build

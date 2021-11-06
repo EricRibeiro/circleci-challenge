@@ -53,14 +53,11 @@ jobs:
             yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - "."
+      
   build:
     <<: *defaults
     steps:
-      - *attach_workspace
+      - checkout # it's probably better to checkout again than persisting the workspace twice in the previous job
       - run:
           name: Build project
           command: yarn build
@@ -68,6 +65,7 @@ jobs:
           root: ./
           paths:
             - "."
+
   deploy:
     <<: *defaults
     steps:
@@ -78,6 +76,14 @@ jobs:
       - run:
           name: Publish package
           command: yarn publish
+      - run:
+          name: Pack artifacts
+          command: |
+            mkdir -p ~/tmp/artifacts
+            yarn pack
+            cp ./*.tgz ~/tmp/artifacts
+      - store_artifacts:
+          path: ~/tmp/artifacts
 
 workflows:
   version: 2

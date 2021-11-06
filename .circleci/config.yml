@@ -21,9 +21,9 @@ jobs:
           name: Run tests
           command: |
             set -e
-            TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split)
-            echo $TEST_FILES
-            node_modules/ts-mocha/bin/ts-mocha $TEST_FILES --reporter mocha-junit-reporter 
+            TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split --split-by=timings)
+            echo "Running test cases in: $TEST_FILES"
+            node_modules/ts-mocha/bin/ts-mocha $TEST_FILES --reporter mocha-junit-reporter
       - store_test_results:
           path: test-results.xml
       - run:

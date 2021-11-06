@@ -7,28 +7,35 @@ aliases: # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-
   - &attach_workspace
       attach_workspace:
         at: ~/project
-  - &restore_cache
-      restore_cache: # using progressively more generic keys to increase hit odds
-        keys:
-          - yarn-packages-v1-{{ checksum "yarn.lock" }}
-          - yarn-packages-v1-
-  - &install_packages
-      run: 
-        name: Install packages
-        command: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
+  - &persist_to_workspace
+      persist_to_workspace:
+        root: ./
+        paths:
+          - "."
 
 jobs:
-  test:
+  checkout: # this workflow could probably be replaced with an orb
     <<: *defaults
-    parallelism: 2
     steps:
       - checkout
-      - *restore_cache
-      - *install_packages
+      - restore_cache: # using progressively more generic keys to increase hit odds
+          keys:
+            - yarn-packages-v1-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-
+      - run: 
+          name: Install packages
+          command: yarn --frozen-lockfile --cache-folder ~/.cache/yarn
       - save_cache:
           paths:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ checksum "yarn.lock" }}
+      - *persist_to_workspace
+      
+  test:
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - *attach_workspace
       - run:
           name: Split tests
           command: |
@@ -60,16 +67,15 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - checkout # it's probably better to checkout again than persisting the workspace twice in the previous job
-      - *restore_cache
-      - *install_packages
+      - *attach_workspace 
       - run:
           name: Build project
           command: yarn build
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - "."
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >> ] # no need to persist built files if we are not deploying
+          steps:
+            - *persist_to_workspace
 
   deploy:
     <<: *defaults
@@ -92,16 +98,16 @@ jobs:
 
 workflows:
   version: 2
-  test_and_build:
+  test_build_and_deploy:
     jobs:
       - test
       - build:
           requires:
             - test
-  deploy:
-    when:
-      equal : [ main, << pipeline.git.branch >> ]
-    jobs:
       - deploy:
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - main

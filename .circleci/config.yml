@@ -25,3 +25,5 @@ jobs:
       - run:
           name: Run coverage
           command: yarn coverage
+      - store_artifacts:
+          path: coverage

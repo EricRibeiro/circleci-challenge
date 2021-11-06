@@ -23,11 +23,21 @@ jobs:
             set -e
             TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split --split-by=timings)
             echo "Running test cases in: $TEST_FILES"
-            node_modules/ts-mocha/bin/ts-mocha $TEST_FILES --reporter mocha-junit-reporter
+            yarn test $TEST_FILES
+      - run: # https://github.com/michaelleeallen/mocha-junit-reporter/issues/132#issuecomment-864212687
+          name: Process test report
+          when: always
+          command: |
+            # Convert absolute paths to relative to support splitting tests by timing
+            if [ -e test-results.xml ]; then
+              sed -i "s|`pwd`/||g" test-results.xml
+            fi            
       - store_test_results:
           path: test-results.xml
       - run:
           name: Run coverage
-          command: yarn coverage
+          command: |
+            echo "Running coverage in: $TEST_FILES"
+            yarn coverage $TEST_FILES
       - store_artifacts:
           path: coverage

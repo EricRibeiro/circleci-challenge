@@ -8,8 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -b --verbose",
-    "test": "ts-mocha src/**/*.test.ts --reporter mocha-junit-reporter",
-    "coverage": "nyc yarn run test"
+    "test": "sh -c 'ts-mocha ${0} --reporter mocha-junit-reporter'",
+    "coverage": "sh -c 'nyc yarn run test ${0}'"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",

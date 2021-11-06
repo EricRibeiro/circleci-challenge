@@ -30,7 +30,20 @@ jobs:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ checksum "yarn.lock" }}
       - *persist_to_workspace
-      
+  
+  build:
+    <<: *defaults
+    steps:
+      - *attach_workspace 
+      - run:
+          name: Build project
+          command: yarn build
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >> ] # no need to persist built files if we are not deploying
+          steps:
+            - *persist_to_workspace
+
   test:
     <<: *defaults
     parallelism: 2
@@ -63,19 +76,6 @@ jobs:
             yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage
-      
-  build:
-    <<: *defaults
-    steps:
-      - *attach_workspace 
-      - run:
-          name: Build project
-          command: yarn build
-      - when:
-          condition:
-            equal: [ main, << pipeline.git.branch >> ] # no need to persist built files if we are not deploying
-          steps:
-            - *persist_to_workspace
 
   deploy:
     <<: *defaults
@@ -98,18 +98,18 @@ jobs:
 
 workflows:
   version: 2
-  test_build_and_deploy:
+  build_test_and_deploy:
     jobs:
       - checkout
-      - test:
-          requires:
-            - checkout
       - build:
           requires:
-            - test
-      - deploy:
+            - checkout
+      - test:
           requires:
             - build
+      - deploy:
+          requires:
+            - test
           filters:
             branches:
               only:

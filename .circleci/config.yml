@@ -21,7 +21,7 @@ jobs:
           name: Split tests
           command: |
             TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split --split-by=timings)
-            echo 'export TEST_FILES_ENV="$TEST_FILES"' >> $BASH_ENV
+            echo 'export TEST_FILES_ENV=$TEST_FILES' >> $BASH_ENV
       - run:
           name: Run tests
           command: |

@@ -18,12 +18,15 @@ jobs:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ checksum "yarn.lock" }}
       - run:
+          name: Split tests
+          command: |
+            TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split --split-by=timings)
+            echo 'export TEST_FILES_ENV="TEST_FILES"' >> $BASH_ENV
+      - run:
           name: Run tests
           command: |
-            set -e
-            TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split --split-by=timings)
-            echo "Running test cases in: $TEST_FILES"
-            yarn test $TEST_FILES
+            echo "Running test cases in: $TEST_FILES_ENV"
+            yarn test $TEST_FILES_ENV
       - run: # https://github.com/michaelleeallen/mocha-junit-reporter/issues/132#issuecomment-864212687
           name: Process test report
           when: always
@@ -37,7 +40,7 @@ jobs:
       - run:
           name: Run coverage
           command: |
-            echo "Running coverage in: $TEST_FILES"
-            yarn coverage $TEST_FILES
+            echo "Running coverage in: $TEST_FILES_ENV"
+            yarn coverage $TEST_FILES_ENV
       - store_artifacts:
           path: coverage

@@ -1,0 +1,52 @@
+{
+  "ts-node": {
+    "files": true
+  },
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es5",
+    "module": "commonjs",
+    "lib": [
+      "es2015",
+      "es2017",
+      "dom"
+    ],
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "src/",
+    "noEmit": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ],
+    "types": [
+      "mocha"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "pretty": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts"
+  ],
+  "compileOnSave": true
+}

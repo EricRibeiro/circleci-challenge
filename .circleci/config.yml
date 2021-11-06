@@ -1,14 +1,12 @@
 version: 2.1
 jobs:
   build:
+    parallelism: 2
     docker:
-      - image: cimg/node:14.15.4 # the primary container, where your job's commands are run
+      - image: cimg/node:14.15.4
     steps:
-      - checkout # check out the code in the project directory
-
-      # https://circleci.com/docs/2.0/caching/#yarn-node
-      # using progressively more generic keys to increase hit odds
-      - restore_cache: 
+      - checkout
+      - restore_cache: # using progressively more generic keys to increase hit odds
           keys:
             - yarn-packages-v1-{{ checksum "yarn.lock" }}
             - yarn-packages-v1-
@@ -21,7 +19,10 @@ jobs:
           key: yarn-packages-v1-{{ checksum "yarn.lock" }}
       - run:
           name: Run tests
-          command: yarn test
+          command: |
+            set -e
+            TEST_FILES=$(circleci tests glob "src/**/*.test.ts" | circleci tests split -- split-by=timings)
+            ts-mocha $TEST_FILES --reporter mocha-junit-reporter 
       - store_test_results:
           path: test-results.xml
       - run:
